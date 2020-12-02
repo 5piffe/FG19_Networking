@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameFramework/Pawn.h"
-//#include "FGPlayer.h"
 #include "FGPlayer.generated.h"
 
 class UCameraComponent;
@@ -49,14 +48,12 @@ public:
 
 	FRotator Rotation;
 	
-	// Sending data, in this case the FVector, to the server. Now server knows we're moving, but not the other clients
 	UFUNCTION(Server, Unreliable)
 	void Server_SendLocation(const FVector& LocationToSend);
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_SendLocation(const FVector& LocationToSend);
 
-	// Rotation
 	UFUNCTION(Server, Unreliable)
 	void Server_SendRotation(const FRotator& RotationToSend);
 

@@ -103,7 +103,7 @@ void AFGPlayer::Multicast_SendLocation_Implementation(const FVector& LocationToS
 {
 	if (!IsLocallyControlled())
 	{
-		SetActorLocation(LocationToSend); // TODO: Smooth visual replication & mush together data to send in one function eller nåt maybe
+		SetActorLocation(LocationToSend);
 	}
 }
 

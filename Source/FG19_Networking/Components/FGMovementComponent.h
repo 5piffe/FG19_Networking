@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameFramework/MovementComponent.h"
-//#include "FGMovementComponent.h"
 #include "FGMovementComponent.generated.h"
 
 struct FFGFrameMovement;
