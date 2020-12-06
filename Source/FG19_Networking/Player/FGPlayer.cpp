@@ -28,8 +28,6 @@ AFGPlayer::AFGPlayer()
 
 	MovementComponent = CreateDefaultSubobject<UFGMovementComponent>(TEXT("MovementComponent"));
 
-	Rotation = MeshComponent->GetRelativeRotation();
-
 	SetReplicateMovement(false);
 }
 
@@ -46,6 +44,12 @@ void AFGPlayer::Tick(float DeltaTime)
 
 	if (IsLocallyControlled())
 	{
+		Server_SendLocationAndRotation(GetActorLocation(), GetActorRotation());
+		
+		/* ...Testa
+		* 1 Store location -> 2 send old location, lerp -> store new ->
+		*/
+
 		const float Friction = IsBraking() ? BrakingFriction : DefaultFriction;
 		const float Alpha = FMath::Clamp(FMath::Abs(MovementVelocity / (MaxVelocity * 0.75f)), 0.0f, 1.0f);
 		const float TurnSpeed = FMath::InterpEaseOut(0.0f, TurnSpeedDefault, Alpha, 5.0f);
@@ -65,9 +69,6 @@ void AFGPlayer::Tick(float DeltaTime)
 		MovementComponent->ApplyGravity();
 		FrameMovement.AddDelta(GetActorForwardVector() * MovementVelocity * DeltaTime);
 		MovementComponent->Move(FrameMovement);
-
-		Server_SendLocation(GetActorLocation());
-		Server_SendRotation(GetActorRotation());
 	}
 }
 
@@ -94,33 +95,19 @@ int32 AFGPlayer::GetPing() const
 }
 
 
-void AFGPlayer::Server_SendLocation_Implementation(const FVector& LocationToSend)
+void AFGPlayer::Server_SendLocationAndRotation_Implementation(const FVector& LocationToSend, const FRotator& RotationToSend)
 {
-	Multicast_SendLocation(LocationToSend);
+	Multicast_SendLocationAndRotation(LocationToSend, RotationToSend);
 }
 
-void AFGPlayer::Multicast_SendLocation_Implementation(const FVector& LocationToSend)
+void AFGPlayer::Multicast_SendLocationAndRotation_Implementation(const FVector& LocationToSend, const FRotator& RotationToSend)
 {
 	if (!IsLocallyControlled())
 	{
 		SetActorLocation(LocationToSend);
-	}
-}
-
-
-void AFGPlayer::Server_SendRotation_Implementation(const FRotator& RotationToSend) 
-{
-	Mulitcast_SendRotation(RotationToSend);
-}
-
-void AFGPlayer::Mulitcast_SendRotation_Implementation(const FRotator& RotationToSend)
-{
-	if (!IsLocallyControlled())
-	{
 		SetActorRotation(RotationToSend);
 	}
 }
-
 
 
 void AFGPlayer::Handle_Accelerate(float Value)
