@@ -73,6 +73,8 @@ public:
 
 
 private:
+	void AddMovementVelocity(float DeltaTime);
+
 	UPROPERTY(Replicated)
 	float ReplicatedYaw = 0.0f;
 
@@ -88,6 +90,12 @@ private:
 
 	FVector GetRocketStartLocation() const;
 	AFGRocket* GetFreeRocket() const;
+
+	UFUNCTION(Server, Unreliable)
+	void Server_SendMovement(const FVector& ClientLocation, float Timestamp, float ClientForward, float ClientYaw);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_SendMovement(const FVector& InClientLocation, float Timestamp, float ClientForward, float ClientYaw);
 
 	UFUNCTION(Server, Reliable)
 	void Server_FireRocket(AFGRocket* NewRocket, const FVector& RocketStartLocation, const FRotator& RocketFacingRotation);
@@ -128,14 +136,20 @@ private:
 
 	bool bShowDebugMenu = false;
 
-
 	float Forward = 0.0f;
 	float Turn = 0.0f;
-
 	float MovementVelocity = 0.0f;
 	float Yaw = 0.0f;
-
 	bool bBrake = false;
+
+	float ClientTimestamp = 0.0f;
+	float ServerTimestamp = 0.0f;
+	float LastCorrectionDelta = 0.0f;
+
+	UPROPERTY(EditAnywhere, Category = Network)
+	bool bPerformNetowkSmoothing = true;
+
+	FVector OriginalMeshOffset = FVector::ZeroVector;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Collision)
 	USphereComponent* CollisionComponent;
